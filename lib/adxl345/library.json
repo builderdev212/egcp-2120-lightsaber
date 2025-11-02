@@ -1,0 +1,15 @@
+{
+  "name": "adxl345",
+  "version": "1.0",
+  "description": "An accelerometer library for the ADXL345.",
+  "authors":
+  [
+    {
+      "name": "builderdev212",
+      "maintainer": true
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": "nanoatmega328",
+  "headers": "adxl345.h"
+}

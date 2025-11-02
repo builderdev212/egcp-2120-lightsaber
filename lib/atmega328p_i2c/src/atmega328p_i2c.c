@@ -26,6 +26,11 @@
     WAIT_FOR_TRANSMIT(); \
     if (!STATUS(I2C_START)) return
 
+#define RESTART() \
+    TWCR = 0xA4; \
+    WAIT_FOR_TRANSMIT(); \
+    if (!STATUS(I2C_REPEATED_START)) return
+
 /**
  * @brief SEND data over the I2C bus to the target device.
  * 
@@ -72,13 +77,6 @@ void start_i2c() {
     TWCR = 0x04; 
 }
 
-/**
- * @brief I2C write function.
- * 
- * @param dev_addr target device address.
- * @param data pointer to array of data to be sent over i2c.
- * @param length length of the array.
- */
 void write_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length) {
     START();
     SEND(dev_addr, I2C_SEND_WADDR);
@@ -88,15 +86,20 @@ void write_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length) {
     STOP();
 }
 
-/**
- * @breif I2C read function.
- * 
- * @param dev_addr target device address.
- * @param data pointer to array to store the data recieved.
- * @param length of the data to be recieved.
- */
 void read_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length) {
     START();
+    SEND(dev_addr | 0x01, I2C_SEND_RADDR);
+    for (uint8_t i = 0; i < length; i++) {
+        RECV(*(data + i), ((i == length-1) ? 1 : 0));
+    }
+    STOP();
+}
+
+void addr_read_i2c(uint8_t dev_addr, uint8_t starting_reg_addr, uint8_t *data, uint8_t length) {
+    START();
+    SEND(dev_addr, I2C_SEND_WADDR);
+    SEND(starting_reg_addr, I2C_SEND_DATA);
+    RESTART();
     SEND(dev_addr | 0x01, I2C_SEND_RADDR);
     for (uint8_t i = 0; i < length; i++) {
         RECV(*(data + i), ((i == length-1) ? 1 : 0));
