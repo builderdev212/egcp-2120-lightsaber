@@ -58,14 +58,16 @@
 /**
  * @brief Transmit STOP to end I2C transaction.
  */
-#define STOP() TWCR = 0x94
+#define STOP() \
+    TWCR = 0x94; \
+    while ((TWCR & 0x10) >> 4)
 
 /**********************
  * I2C User Functions *
  **********************/
 
 void start_i2c() {
-    // Turn the clock to the i2c module on.
+    // turn the clock to the i2c module on
     PRR &= 0x7F;
     // enable internal pullups and set the I2C pins to input
     I2C_PORT |= I2C_SDA_PIN | I2C_SCL_PIN;
