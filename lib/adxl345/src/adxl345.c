@@ -5,10 +5,14 @@
  ****************/
 
 #define ADXL345_ID_ADDR 0x00
+#define ADXL345_ACT_THRESH 0x24
+#define ADXL345_ACT_CTRL 0x27
+#define ADXL345_BR 0x2C
 #define ADXL345_POWER_CTL 0x2D
+#define ADXL345_INT_EN 0x2E
+#define ADXL345_INT_MAP 0x2F
 #define ADXL345_DATA_FORMAT 0x31
 #define ADXL345_DATA_START 0x32
-#define ADXL345_BR 0x2C
 
 /***************************
  * ADXL345 MACRO Functions *
@@ -37,11 +41,23 @@ void enable_adxl345() {
     // setup the data format
     uint8_t dfwdata[2] = {ADXL345_DATA_FORMAT, 0x00};
     write_i2c(ADXL345_ADDR, dfwdata, 2);
+}
+
+void setup_adxl345_activity_interrupt() {
     // setup the interrupt pin (INT0)
     EICRA = 0x03;
     EIMSK = 0x01;
     INT_PORT |= ADXL345_INT_PIN;
     INT_PORT_IO_CONF &= ~(ADXL345_INT_PIN);
+    // enable global interrupts
+    sei();
+    // setup activity interrupt
+    uint8_t atwdata[2] = {ADXL345_ACT_THRESH, 0x10};
+    write_i2c(ADXL345_ADDR, atwdata, 2);
+    uint8_t acwdata[2] = {ADXL345_ACT_CTRL, 0xF0};
+    write_i2c(ADXL345_ADDR, acwdata, 2);
+    uint8_t icwdata[2] = {ADXL345_INT_EN, 0x10, 0xEF};
+
 }
 
 struct acceleration get_current_acceleration() {

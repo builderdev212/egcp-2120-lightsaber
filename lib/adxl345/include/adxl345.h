@@ -2,6 +2,7 @@
 #define ADXL345_H
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <atmega328p_i2c.h>
 
 /************************
@@ -46,6 +47,11 @@ uint8_t is_adxl345_present();
  * @brief Put the ADXL345 into measure mode and ensure it is out of sleep.
  */
 void enable_adxl345();
+
+/**
+ * @brief Setup INT0 and setup activity interrupts from the ADXL345.
+ */
+void setup_adxl345_activity_interrupt();
 
 /**
  * @brief Get the current acceleration measured by the accelerometer.
