@@ -1,29 +1,5 @@
 #include "adxl345.h"
 
-/****************
- * Register Map *
- ****************/
-
-#define ADXL345_ID_ADDR 0x00
-#define ADXL345_ACT_THRESH 0x24
-#define ADXL345_ACT_CTRL 0x27
-#define ADXL345_BR 0x2C
-#define ADXL345_POWER_CTL 0x2D
-#define ADXL345_INT_EN 0x2E
-#define ADXL345_INT_MAP 0x2F
-#define ADXL345_DATA_FORMAT 0x31
-#define ADXL345_DATA_START 0x32
-
-/***************************
- * ADXL345 MACRO Functions *
- ***************************/
-
-#define CONCAT_CAST_2xU8_TO_S16(val1, val2) (int16_t)(((uint16_t)val2 << 8) | (uint16_t)val1)
-
-/**************************
- * ADXL345 User Functions *
- **************************/
-
 uint8_t is_adxl345_present() {
     uint8_t device_id[1] = {0x00};
     addr_read_i2c(ADXL345_ADDR, ADXL345_ID_ADDR, device_id, 1);
