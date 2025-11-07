@@ -1,0 +1,15 @@
+{
+  "name": "mcp4725",
+  "version": "1.0",
+  "description": "A DAC helper library for the MCP4725.",
+  "authors":
+  [
+    {
+      "name": "builderdev212",
+      "maintainer": true
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": "nanoatmega328",
+  "headers": "mcp4725.h"
+}
