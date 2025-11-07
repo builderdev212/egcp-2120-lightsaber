@@ -2,6 +2,7 @@
 #include <avr/interrupt.h>
 #include <atmega328p_i2c.h>
 #include <adxl345.h>
+#include <mcp4725.h>
 
 // Accelerometer Interupt
 uint8_t a_flag = 0;
@@ -17,6 +18,7 @@ int main() {
     if (is_adxl345_present() != 1) return -1;
     setup_adxl345_activity_interrupt();
     enable_adxl345();
+    write_mcp4725(0x0000);
 
     while (1) {
         // do stuff

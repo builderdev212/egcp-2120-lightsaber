@@ -8,7 +8,7 @@ void start_i2c() {
     I2C_PORT_IO_CONF &= ~(I2C_SDA_PIN | I2C_SCL_PIN);
     // Setup the I2C timing register
     TWSR = 0x00; // set the prescaler to 1
-    TWBR = 72; // see section 21.5.2 for this calculation, should set SCL speed to 100KHz based on 16MHz input clk
+    TWBR = 12; // see section 21.5.2 for this calculation, should set SCL speed to 400KHz based on 16MHz input clk
     // Start the I2C controller
     TWCR = 0x04; 
 }

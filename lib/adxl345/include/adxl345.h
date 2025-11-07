@@ -6,9 +6,9 @@
 #include <stdint.h>
 #include <atmega328p_i2c.h>
 
-/************************
- * I2C Status Constants *
- ************************/
+/*********************
+ * ADXL345 Constants *
+ *********************/
 
 #define INT_PORT PORTD
 #define INT_PORT_IO_CONF DDRD
@@ -36,9 +36,9 @@
 
 #define CONCAT_CAST_2xU8_TO_S16(val1, val2) (int16_t)(((uint16_t)val1 << 8) | (uint16_t)val2)
 
-/*********************************
- * I2C User Function Definitions *
- *********************************/
+/*************************************
+ * ADXL345 User Function Definitions *
+ *************************************/
 
 #ifdef __cplusplus
 extern "C" {

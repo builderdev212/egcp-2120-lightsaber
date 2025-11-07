@@ -32,8 +32,8 @@ void setup_adxl345_activity_interrupt() {
     write_i2c(ADXL345_ADDR, atwdata, 2);
     uint8_t acwdata[2] = {ADXL345_ACT_CTRL, 0xF0};
     write_i2c(ADXL345_ADDR, acwdata, 2);
-    uint8_t icwdata[2] = {ADXL345_INT_EN, 0x10, 0xEF};
-
+    uint8_t icwdata[3] = {ADXL345_INT_EN, 0x10, 0xEF};
+    write_i2c(ADXL345_ADDR, icwdata, 3);
 }
 
 struct acceleration get_current_acceleration() {
