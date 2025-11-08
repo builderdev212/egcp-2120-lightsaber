@@ -1,0 +1,15 @@
+{
+  "name": "ws2812b",
+  "version": "1.0",
+  "description": "A I2C helper library for the ATmega328P.",
+  "authors":
+  [
+    {
+      "name": "Shierman",
+      "maintainer": true
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": "nanoatmega328",
+  "headers": "atmega328p_i2c.h"
+}
