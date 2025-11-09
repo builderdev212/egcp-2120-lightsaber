@@ -10,8 +10,8 @@
 
 #define I2C_PORT PORTC
 #define I2C_PORT_IO_CONF DDRC
-#define I2C_SDA_PIN 0x10 // pin 4
-#define I2C_SCL_PIN 0x20 // pin 5
+#define I2C_SDA_PIN 0x10 // pin A4
+#define I2C_SCL_PIN 0x20 // pin A5
 
 #define I2C_START 0x08 // sent start
 #define I2C_REPEATED_START 0x10 // sent restart
@@ -45,12 +45,12 @@
 #define START() \
     TWCR = 0xA4; \
     WAIT_FOR_TRANSMIT(); \
-    if (!STATUS(I2C_START)) return
+    if (!STATUS(I2C_START)) return -2
 
 #define RESTART() \
     TWCR = 0xA4; \
     WAIT_FOR_TRANSMIT(); \
-    if (!STATUS(I2C_REPEATED_START)) return
+    if (!STATUS(I2C_REPEATED_START)) return -2
 
 /**
  * @brief SEND data over the I2C bus to the target device.
@@ -62,7 +62,7 @@
     TWDR = data; \
     TWCR = 0x84; \
     WAIT_FOR_TRANSMIT(); \
-    if (!STATUS(expected_status)) return
+    if (!STATUS(expected_status)) return -1
 
 /**
  * @brief RECIEVE data from the target I2C device.
@@ -73,7 +73,7 @@
 #define RECV(data, last) \
     TWCR = 0x84 | ((last) ? 0x00 : 0x40); \
     WAIT_FOR_TRANSMIT(); \
-    if (!STATUS((last) ? I2C_RECV_DATA_END : I2C_RECV_DATA)) return; \
+    if (!STATUS((last) ? I2C_RECV_DATA_END : I2C_RECV_DATA)) return -1; \
     data = (uint8_t)TWDR
 
 /**
@@ -103,7 +103,7 @@ void start_i2c();
  * @param data pointer to array of data to be sent over i2c.
  * @param length length of the array.
  */
-void write_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length);
+int write_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length);
 
 /**
  * @brief I2C read function.
@@ -112,7 +112,7 @@ void write_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length);
  * @param data pointer to array to store the data recieved.
  * @param length of the data to be recieved.
  */
-void read_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length);
+int read_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length);
 
 /**
  * @brief Set address and read function.
@@ -122,7 +122,7 @@ void read_i2c(uint8_t dev_addr, uint8_t *data, uint8_t length);
  * @param data pointer to array to store the data recieved.
  * @param length of the data to be recieved.
  */
-void addr_read_i2c(uint8_t dev_addr, uint8_t starting_reg_addr, uint8_t *data, uint8_t length);
+int addr_read_i2c(uint8_t dev_addr, uint8_t starting_reg_addr, uint8_t *data, uint8_t length);
 
 #ifdef __cplusplus
 }
