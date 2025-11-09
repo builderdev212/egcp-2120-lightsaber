@@ -8,10 +8,10 @@
 #include <mcp4725.h>
 
 // Accelerometer Interupt
-// uint8_t a_flag = 0;
-// ISR(INT0_vect) {
-//     a_flag = 1;
-// }
+uint8_t a_flag = 0;
+ISR(INT0_vect) {
+    a_flag = 1;
+}
 
 int main() {
     // Initialize hardware
