@@ -1,7 +1,7 @@
 {
-  "name": "adxl345",
+  "name": "mpu6050",
   "version": "1.0",
-  "description": "An accelerometer library for the ADXL345.",
+  "description": "An accelerometer library for the MPU6050.",
   "authors":
   [
     {
@@ -11,5 +11,8 @@
   ],
   "frameworks": "arduino",
   "platforms": "nanoatmega328",
-  "headers": "adxl345.h"
+  "build": {
+      "includeDir": "include",
+      "srcDir": "src"
+  }
 }
