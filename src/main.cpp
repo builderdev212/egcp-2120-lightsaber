@@ -7,6 +7,10 @@
 #include <mpu6050.h>
 #include <mcp4725.h>
 
+// Sound files
+#include "swing3.h"
+#define SWING3_LEN 7746
+
 // Accelerometer Interupt
 uint8_t a_flag = 0;
 ISR(INT0_vect) {
@@ -21,10 +25,11 @@ int main() {
     write_mcp4725(0x000);
 
     while (1) {
-        // do stuff
         if (a_flag) {
             uart_print("MOTION!!!");
-            // do something with data
+            for (int i = 0; i < SWING3_LEN; i++) {
+                write_mcp4725((uint16_t)swing3[i] << 4);
+            }
             clear_mpu6050_int_status();
             a_flag = 0;
         }
