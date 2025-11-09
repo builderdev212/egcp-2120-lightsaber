@@ -3,13 +3,14 @@
 
 #include <avr/io.h>
 #include <stdint.h>
-#include <atmega328p_i2c.h>
+#include <atmega328p/i2c.h>
+#include <atmega328p/serial.h>
 
 /*********************
  * MCP4725 Constants *
  *********************/
 
-#define MCP4725_ADDR 0x60
+#define MCP4725_ADDR 0xC0
 
 /*************************************
  * MCP4725 User Function Definitions *

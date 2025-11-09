@@ -11,5 +11,8 @@
   ],
   "frameworks": "arduino",
   "platforms": "nanoatmega328",
-  "headers": "mcp4725.h"
+  "build": {
+      "includeDir": "include",
+      "srcDir": "src"
+  }
 }

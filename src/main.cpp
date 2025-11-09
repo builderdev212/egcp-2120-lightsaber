@@ -1,9 +1,10 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-#include <Arduino.h>
-#include <atmega328p_i2c.h>
-#include <adxl345.h>
+#include <stdint.h>
+#include <atmega328p/i2c.h>
+#include <atmega328p/serial.h>
+#include <mpu6050.h>
 #include <mcp4725.h>
 
 // Accelerometer Interupt
@@ -13,28 +14,20 @@
 // }
 
 int main() {
-    // Initalize I2C
+    // Initialize hardware
+    uart_init(9600);
     start_i2c();
-    Serial.begin(9600);
-
-    // Setup accelerometer
-    // if (is_adxl345_present() != 1) return -1;
-    // setup_adxl345_activity_interrupt();
-    // enable_adxl345();
-    write_mcp4725(0x0000);
-    Serial.println("sent");
+    setup_mpu6050(5, 1);
+    write_mcp4725(0x000);
 
     while (1) {
-        for (int i = 0; i < 512; i++) {
-            write_mcp4725(i);
-            _delay_ms(1000);
-            Serial.println("sent");
-        }
         // do stuff
-        // if (a_flag) {
-        //     acceleration fdata = get_current_acceleration();
-        //     // do something with data
-        //     a_flag = 0;
-        // }
+        if (a_flag) {
+            uart_print("MOTION!!!");
+            // do something with data
+            clear_mpu6050_int_status();
+            a_flag = 0;
+        }
+        _delay_ms(1);
     }
 }
