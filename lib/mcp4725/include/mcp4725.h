@@ -21,6 +21,21 @@ extern "C" {
 #endif
 
 /**
+ * @brief Setup Timer 1 to run at 4KHz to match WAV files.
+ */
+void setup_timer1_4khz();
+
+/**
+ * @brief Start Timer1.
+ */
+void start_timer1();
+
+/**
+ * @brief Stop Timer1.
+ */
+void stop_timer1();
+
+/**
  * @brief Output a given value to the DAC.
  * 
  * @param data 12-bit value to be passed straight to the DAC.

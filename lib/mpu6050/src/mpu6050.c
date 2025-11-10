@@ -19,8 +19,6 @@ void setup_mpu6050(uint8_t threshold, uint8_t duration) {
     EIMSK |= 0x01;
     INT_PORT |= MPU6050_INT_PIN;
     INT_PORT_IO_CONF &= ~(MPU6050_INT_PIN);
-    // enable global interrupts
-    sei();
 }
 
 void clear_mpu6050_int_status() {
