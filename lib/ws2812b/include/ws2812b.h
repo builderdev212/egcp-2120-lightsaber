@@ -11,6 +11,7 @@
 
 #include <avr/io.h>
 #include <stdint.h>
+#include <avr/interrupt.h>
 
 /*********************************
  * I2C User Function Definitions *
@@ -100,12 +101,15 @@ void SendArrayRGB(unsigned char R[], unsigned char G[], unsigned char B[], unsig
     unsigned char currG;
     unsigned char currB;
 
+    cli(); //Disable interupts
     for(int i = 0; i < arraySize; i++) { //This only works if the array size is correct
         currR = R[i];
         currG = G[i];
         currB = B[i];
         SendOneRGB(currR, currG, currB);
     }
+    SendLogic(RESET);
+    sei(); //Enable interupts
 }
 
 #ifdef __cplusplus
