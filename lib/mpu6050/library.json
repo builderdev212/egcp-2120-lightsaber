@@ -1,7 +1,7 @@
 {
-  "name": "mcp4725",
+  "name": "mpu6050",
   "version": "1.0",
-  "description": "A DAC helper library for the MCP4725.",
+  "description": "An accelerometer library for the MPU6050.",
   "authors":
   [
     {
@@ -11,5 +11,8 @@
   ],
   "frameworks": "arduino",
   "platforms": "nanoatmega328",
-  "headers": "mcp4725.h"
+  "build": {
+      "includeDir": "include",
+      "srcDir": "src"
+  }
 }

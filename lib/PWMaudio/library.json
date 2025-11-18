@@ -1,7 +1,7 @@
 {
-  "name": "atmega328p_i2c",
+  "name": "PWMaudio",
   "version": "1.0",
-  "description": "A I2C helper library for the ATmega328P.",
+  "description": "A PWM audio driver.",
   "authors":
   [
     {
@@ -11,5 +11,8 @@
   ],
   "frameworks": "arduino",
   "platforms": "nanoatmega328",
-  "headers": "atmega328p_i2c.h"
+  "build": {
+      "includeDir": "include",
+      "srcDir": "src"
+  }
 }
