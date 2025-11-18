@@ -2,13 +2,14 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdint.h>
+
 #include <atmega328p/i2c.h>
 #include <atmega328p/serial.h>
 #include <mpu6050.h>
-#include <mcp4725.h>
+#include <PWMaudio.h>
 
 // Accelerometer Interupt
-uint8_t a_flag = 0;
+volatile uint8_t a_flag = 0;
 ISR(INT0_vect) {
     a_flag = 1;
 }
@@ -17,17 +18,29 @@ int main() {
     // Initialize hardware
     uart_init(9600);
     start_i2c();
-    setup_mpu6050(5, 1);
-    write_mcp4725(0x000);
+    setup_mpu6050(2, 1);
+    setupPWM();
+    setFrequency(100);
+
+    // enable global interrupts
+    sei();
 
     while (1) {
-        // do stuff
+        // play sound if interrupt has been recieved
         if (a_flag) {
-            uart_print("MOTION!!!");
-            // do something with data
             clear_mpu6050_int_status();
+            for (int  i = 100; i > 50; i--) {
+                setFrequency(i);
+                _delay_ms(20);
+            }
+            for (int  i = 50; i < 101; i++) {
+                setFrequency(i);
+                _delay_ms(10);
+            }
+            setFrequency(100);
             a_flag = 0;
         }
-        _delay_ms(1);
     }
+
+    return 0;
 }
