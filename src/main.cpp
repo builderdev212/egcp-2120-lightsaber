@@ -7,22 +7,71 @@
 #include <atmega328p/serial.h>
 #include <mpu6050.h>
 #include <PWMaudio.h>
-#include <ws2812b.h>
+#include <ws2812e.h>
 
 // Accelerometer Interupt
-ISR(INT0_vect) {            
-    clear_mpu6050_int_status();
-    trigger_slash(1000);
+volatile uint8_t accelerometer_flag = 0;
+ISR(INT0_vect) {
+    accelerometer_flag = 1;
 }
 
-int main()
-{
+// Use a static sine table instead of the sin() function
+static const uint8_t sine_table256[256] PROGMEM = {
+    128, 131, 134, 137, 140, 143, 146, 149, 152, 155, 158, 161, 164, 167, 170, 173,
+    176, 179, 182, 185, 188, 191, 194, 197, 200, 203, 206, 209, 212, 215, 218, 221,
+    224, 227, 230, 233, 236, 239, 242, 244, 247, 250, 252, 255, 255, 255, 255, 255,
+    255, 255, 255, 252, 250, 247, 244, 242, 239, 236, 233, 230, 227, 224, 221, 218,
+    215, 212, 209, 206, 203, 200, 197, 194, 191, 188, 185, 182, 179, 176, 173, 170,
+    167, 164, 161, 158, 155, 152, 149, 146, 143, 140, 137, 134, 131, 128, 125, 122,
+    119, 116, 113, 110, 107, 104, 101, 98, 95, 92, 89, 86, 83, 80, 77, 74,
+    71, 68, 65, 62, 59, 56, 53, 51, 48, 45, 43, 40, 38, 35, 33, 31,
+    28, 26, 24, 22, 20, 18, 16, 15, 13, 12, 11, 10, 9, 8, 8, 7,
+    7, 7, 7, 7, 8, 8, 9, 10, 11, 12, 13, 15, 16, 18, 20, 22,
+    24, 26, 28, 31, 33, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62,
+    65, 68, 71, 74, 77, 80, 83, 86, 89, 92, 95, 98, 101, 104, 107, 110,
+    113, 116, 119, 122, 125, 128
+};
+
+static inline uint8_t fast_sine_u8(uint32_t phase) {
+    uint8_t idx = (uint8_t)(phase >> 24);
+    return pgm_read_byte(&sine_table256[idx]);
+}
+
+// Hum output variables
+static volatile uint8_t  slash_active = 0;
+static volatile uint32_t slash_pos = 0;
+static volatile uint32_t slash_len = 0;
+static volatile uint32_t phase1 = 0;
+static volatile uint32_t phase2 = 0;
+static volatile uint32_t vib_phase = 0;
+static uint32_t inc1 = 0;
+static uint32_t inc2 = 0;
+static uint32_t vib_inc = 0;
+static uint32_t lfsr = 0xACE1u;
+
+// helper function to turn a frequency into an incremented value
+static uint32_t freq_to_inc(uint16_t freq_hz) {
+    return (uint32_t)((((uint64_t)freq_hz) << 32) / SAMPLE_RATE);
+}
+
+// interrupt for 8khz output
+volatile uint8_t sound_flag = 0;
+ISR(TIMER2_COMPA_vect) {
+    sound_flag = 1;
+}
+
+int main() {
+    // Setup base hum and initialize audio
+    inc1 = freq_to_inc(60);
+    inc2 = freq_to_inc(63);
+    vib_inc = freq_to_inc(4);
+    setupPWM();
+
     // Initialize hardware
-    DDRD |= (1 << PD3);
     uart_init(9600);
     start_i2c();
     setup_mpu6050(2, 1);
-    setupPWM();
+    setup_ws2812e();
 
     unsigned char R[60] = {
         255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -30,7 +79,8 @@ int main()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 25, 51, 76, 102, 128, 153, 179, 204, 230,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+    };
 
     unsigned char G[60] = {
         0, 25, 51, 77, 102, 128, 153, 178, 204, 229,
@@ -38,7 +88,8 @@ int main()
         255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
         255, 230, 204, 178, 153, 128, 102, 76, 51, 25,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
     unsigned char B[60] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -46,7 +97,8 @@ int main()
         0, 25, 51, 76, 102, 128, 153, 179, 204, 229,
         255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
         255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 230, 204, 179, 153, 128, 102, 77, 51, 26};
+        255, 230, 204, 179, 153, 128, 102, 77, 51, 26
+    };
 
     SendArrayRGB(R, G, B, 60);
     _delay_ms(500);
@@ -55,7 +107,56 @@ int main()
     sei();
 
     while (1) {
-        
+        if (sound_flag == 1) {
+            if (slash_active) {
+                uint32_t t = slash_pos;
+                uint32_t len = (slash_len ? slash_len : 1);
+                uint32_t curf = SLASH_BASE_FREQ + ((uint32_t)(SLASH_END_FREQ - SLASH_BASE_FREQ) * t) / len;
+                uint32_t cur_inc = freq_to_inc((uint16_t)curf);
+                phase1 += cur_inc;
+                uint8_t tone = fast_sine_u8(phase1);
+                lfsr = (lfsr >> 1) ^ (-(lfsr & 1u) & 0xB400u);
+                uint8_t noise = (uint8_t)(lfsr & 0xFF);
+                uint16_t env = (uint16_t)(((len - t) * 255UL) / len);
+                int16_t mix = 0;
+                mix += ((int16_t)tone - 128) * SLASH_TONE_GAIN / 100;
+                mix += ((int16_t)noise - 128) * SLASH_NOISE_GAIN / 100;
+                mix = (mix * (int16_t)env) / 255;
+                int16_t out = mix + 128;
+                setInc((uint8_t)out);
+                slash_pos++;
+                if (slash_pos >= slash_len) {
+                    slash_active = 0;
+                    slash_pos = 0;
+                    slash_len = 0;
+                }
+            } else {
+                vib_phase += vib_inc;
+                int8_t vib_offset = (int8_t)((int)fast_sine_u8(vib_phase) - 128) >> 5;
+                uint32_t local_inc1 = inc1 + (((int32_t)inc1 * vib_offset) / 128);
+                uint32_t local_inc2 = inc2 + (((int32_t)inc2 * vib_offset) / 128);
+                phase1 += local_inc1;
+                phase2 += local_inc2;
+                uint8_t s1 = fast_sine_u8(phase1);
+                uint8_t s2 = fast_sine_u8(phase2);
+                lfsr = (lfsr >> 1) ^ (-(lfsr & 1u) & 0xB400u);
+                uint8_t noise = (uint8_t)(lfsr & 0xFF);
+                int16_t mix = 0;
+                mix += ((int16_t)s1 - 128) * 55 / 100;
+                mix += ((int16_t)s2 - 128) * 55 / 100;
+                mix += ((int16_t)noise - 128) * 25 / 100;
+                mix += 128;
+                setInc((uint8_t)mix);
+            }
+            sound_flag = 0;
+        }
+        if (accelerometer_flag == 1) {
+            clear_mpu6050_int_status();
+            slash_len = (1000 * SAMPLE_RATE) / 1000U;
+            slash_pos = 0;
+            slash_active = 1;
+            accelerometer_flag = 0;
+        }
     }
 
     return 0;
