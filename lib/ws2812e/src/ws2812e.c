@@ -1,4 +1,4 @@
-#include "ws2812b.h"
+#include "ws2812e.h"
 
 static inline void PortD3(unsigned char value) {
     if(value == 0) {

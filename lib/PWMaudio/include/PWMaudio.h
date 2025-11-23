@@ -17,8 +17,12 @@
 #ifndef F_CPU
 #define F_CPU 16000000UL
 #endif
-
 #define SAMPLE_RATE 8000UL
+
+#define SLASH_BASE_FREQ   300
+#define SLASH_END_FREQ   1500
+#define SLASH_TONE_GAIN    60
+#define SLASH_NOISE_GAIN   80
 
 /***************************************
  * PWM Audio User Function Definitions *
@@ -30,7 +34,7 @@ extern "C" {
 
 void setupPWM();
 
-void trigger_slash(uint16_t ms);
+void setInc(uint8_t out);
 
 #ifdef __cplusplus
 }
