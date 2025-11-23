@@ -6,6 +6,12 @@
 #include <stdint.h>
 #include <avr/interrupt.h>
 
+
+#define HIGH 0x01
+#define LOW 0x00
+#define RESET 0x02
+#define NOP() asm volatile("nop")
+
 /*********************************
  * LED User Function Definitions *
  *********************************/
